@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json
+
+version: "0.2"
+language: en
+dictionaryDefinitions:
+  - name: project-words
+    path: .cspell/project-words.txt
+dictionaries:
+  - project-words
+ignorePaths:
+  - "**/node_modules/**"
+  - "**/dist/**"
