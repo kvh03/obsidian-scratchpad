@@ -39,7 +39,7 @@
 ![](assets/scratchpad.png)
 
 > [!NOTE]
-> - This is a temporary note — your content is stored in memory and will be lost when the app is closed unless you manually save it to disk.
+> - This is a temporary note — your content is **not** stored in memory and will be lost when the app is closed, unless you manually save it to disk.
 > - Scratchpad **does not support multiple notes**.
 
 Read the blog at https://bit.ly/4exb8PZ.
