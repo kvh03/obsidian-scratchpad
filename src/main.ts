@@ -7,13 +7,13 @@ export default class ScratchpadPlugin extends Plugin {
     async onload() {
         this.registerView(VIEW_TYPE_SCRATCHPAD, (leaf) => new ScratchpadView(leaf, this));
 
-        this.addRibbonIcon("notebook-pen", "Open scratchpad", () => {
-            this.toggleView();
+        this.addRibbonIcon("notebook-pen", "Open scratchpad", async () => {
+            await this.toggleView();
         });
 
         this.addCommand({
             id: "open-scratchpad-view",
-            name: "Open scratchpad",
+            name: "Open",
             callback: () => this.activateView(),
         });
     }
@@ -33,7 +33,7 @@ export default class ScratchpadPlugin extends Plugin {
             const content = await this.app.vault.adapter.read(filePath);
             try {
                 return JSON.parse(content);
-            } catch (e) {
+            } catch {
                 return null;
             }
         }
@@ -44,7 +44,7 @@ export default class ScratchpadPlugin extends Plugin {
         const workspace = this.app.workspace;
         const existingLeaf = workspace.getLeavesOfType(VIEW_TYPE_SCRATCHPAD)[0];
         if (existingLeaf) {
-            workspace.revealLeaf(existingLeaf);
+            await workspace.revealLeaf(existingLeaf);
             return;
         }
 
@@ -53,7 +53,7 @@ export default class ScratchpadPlugin extends Plugin {
             type: VIEW_TYPE_SCRATCHPAD,
             active: true,
         });
-        workspace.revealLeaf(newLeaf);
+        await workspace.revealLeaf(newLeaf);
     }
 
     private async toggleView() {
@@ -75,7 +75,7 @@ export default class ScratchpadPlugin extends Plugin {
                 leaf.view.containerEl.blur();
             }
         } else {
-            workspace.revealLeaf(leaf);
+            await workspace.revealLeaf(leaf);
         }
     }
 }

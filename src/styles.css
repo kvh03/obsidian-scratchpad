@@ -32,6 +32,10 @@
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 6px;
 	overflow: hidden;
+	background-color: #1b1b1b;
+	background-image: linear-gradient(to right, #d9d9d912 1px, transparent 1px),
+		linear-gradient(to bottom, #bababa12 1px, transparent 1px);
+	background-size: 24px 24px;
 	cursor: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1wZW4taWNvbiBsdWNpZGUtcGVuIj48cGF0aCBkPSJNMjEuMTc0IDYuODEyYTEgMSAwIDAgMC0zLjk4Ni0zLjk4N0wzLjg0MiAxNi4xNzRhMiAyIDAgMCAwLS41LjgzbC0xLjMyMSA0LjM1MmEuNS41IDAgMCAwIC42MjMuNjIybDQuMzUzLTEuMzJhMiAyIDAgMCAwIC44My0uNDk3eiIvPjwvc3ZnPg==') 0 21, auto;
 }
 

@@ -23,11 +23,11 @@ export class ScratchpadView extends ItemView {
 
     private plugin: ScratchpadPlugin;
     private debouncedSaveCanvasSnapshot: ReturnType<typeof debounce>;
-    private debouncedSaveTextSnapshot: ReturnType<typeof debounce>;
+    private debouncedSaveTextSnapshot!: ReturnType<typeof debounce>;
 
     constructor(leaf: WorkspaceLeaf, plugin: ScratchpadPlugin) {
         super(leaf);
-        this.canvas = document.createElement("canvas");
+        this.canvas = createEl("canvas");
         this.plugin = plugin;
         this.brushColor = this.getBrushColorFromCSS();
         this.brushSize = this.getBrushSizeFromCSS();
@@ -54,7 +54,7 @@ export class ScratchpadView extends ItemView {
         this.setupCanvas();
         this.setupToolbar();
         this.scope = new Scope(this.app.scope);
-        
+
         await this.loadContentFromPlugin();
         this.resizeCanvas();
 
@@ -78,11 +78,11 @@ export class ScratchpadView extends ItemView {
     }
 
     private getBrushColorFromCSS(): string {
-        return getComputedStyle(document.documentElement).getPropertyValue("--scratchpad-brush-color").trim() || "#FFFFFF";
+        return getComputedStyle(activeDocument.documentElement).getPropertyValue("--scratchpad-brush-color").trim() || "#FFFFFF";
     }
 
     private getBrushSizeFromCSS(): number {
-        const val = getComputedStyle(document.documentElement).getPropertyValue("--scratchpad-brush-size").trim();
+        const val = getComputedStyle(activeDocument.documentElement).getPropertyValue("--scratchpad-brush-size").trim();
         const size = parseInt(val, 10);
         return isNaN(size) ? 2 : size;
     }
@@ -107,7 +107,7 @@ export class ScratchpadView extends ItemView {
     }
 
     private setupActionButtons() {
-        const buttonContainer = this.contentEl.createEl("div", {
+        const buttonContainer = this.contentEl.createDiv({
             cls: "scratchpad-buttons-container",
         });
 
@@ -115,9 +115,10 @@ export class ScratchpadView extends ItemView {
             cls: "scratchpad-save-button",
         });
         setIcon(saveButton, 'save');
-        saveButton.addEventListener("click", async () => {
-            await this.saveContentToPlugin();
-            new Notice('Scratchpad saved');
+        saveButton.addEventListener("click", () => {
+            void this.saveContentToPlugin().then(() => {
+                new Notice('Scratchpad saved');
+            });
         });
 
         const clearNoteBtn = buttonContainer.createEl("button", {
@@ -132,7 +133,7 @@ export class ScratchpadView extends ItemView {
             if (this.canvas && this.ctx) {
                 currentCanvasData = this.canvas.toDataURL("image/png");
             }
-            await this.plugin.saveScratchpadContent("", currentCanvasData);
+            void this.plugin.saveScratchpadContent("", currentCanvasData);
         });
 
         this.contentEl.appendChild(buttonContainer);
@@ -146,7 +147,7 @@ export class ScratchpadView extends ItemView {
     }
 
     private setupToolbar() {
-        const toolbar = this.contentEl.createEl("div", {
+        const toolbar = this.contentEl.createDiv({
             cls: "scratchpad-toolbar",
         });
 
@@ -187,7 +188,7 @@ export class ScratchpadView extends ItemView {
             this.canvasHistory = [];
             this.canvasIndex = -1;
             this.saveCanvasSnapshot();
-            await this.plugin.saveScratchpadContent(this.textarea.value, "");
+            void this.plugin.saveScratchpadContent(this.textarea.value, "");
         });
 
         toolbar.empty();
@@ -276,7 +277,7 @@ export class ScratchpadView extends ItemView {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         if (snapshot) {
-            const tempCanvas = document.createElement('canvas');
+            const tempCanvas = createEl('canvas');
             tempCanvas.width = snapshot.width;
             tempCanvas.height = snapshot.height;
             const tempCtx = tempCanvas.getContext('2d');
@@ -364,7 +365,7 @@ export class ScratchpadView extends ItemView {
 
     private handleUndo(evt: KeyboardEvent) {
         evt.preventDefault();
-        const active = document.activeElement;
+        const active = activeDocument.activeElement;
 
         if (active === this.textarea) {
             this.undoText();
@@ -375,7 +376,7 @@ export class ScratchpadView extends ItemView {
 
     private handleRedo(evt: KeyboardEvent) {
         evt.preventDefault();
-        const active = document.activeElement;
+        const active = activeDocument.activeElement;
 
         if (active === this.textarea) {
             this.redoText();
@@ -425,7 +426,7 @@ export class ScratchpadView extends ItemView {
                     this.ctx.scale(originalDevicePixelRatio, originalDevicePixelRatio);
                     this.resizeCanvas();
                 };
-                img.onerror = (e) => {
+                img.onerror = () => {
                     if (this.ctx) {
                         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
                     }
