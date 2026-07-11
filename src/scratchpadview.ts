@@ -385,6 +385,15 @@ export class ScratchpadView extends ItemView {
         }
     }
 
+    public getTextValue(): string {
+        return this.textarea.value;
+    }
+
+    public setTextValue(val: string) {
+        this.textarea.value = val;
+        this.saveTextSnapshot(); // Adds to undo history
+    }
+
     public async saveContentToPlugin(): Promise<void> {
         const textContent = this.textarea.value;
         let canvasContent = "";

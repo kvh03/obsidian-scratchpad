@@ -1,4 +1,4 @@
-import { Plugin } from "obsidian";
+import { Plugin, Notice } from "obsidian";
 import { ScratchpadView, VIEW_TYPE_SCRATCHPAD } from "./scratchpadview";
 
 const SCRATCHPAD_FILE_NAME = "history.json";
@@ -16,6 +16,46 @@ export default class ScratchpadPlugin extends Plugin {
             name: "Open",
             callback: () => this.activateView(),
         });
+
+        this.registerEvent(
+            this.app.workspace.on("editor-menu", (menu, editor) => {
+                const selection = editor.getSelection();
+                if (!selection) return;
+
+                menu.addItem((item) => {
+                    item
+                        .setTitle("Copy to Scratchpad")
+                        .setIcon("notebook-pen")
+                        .onClick(async () => {
+                            await this.appendToScratchpad(selection);
+                        });
+                });
+            })
+        );
+    }
+
+    async appendToScratchpad(textToAppend: string) {
+        // Find if the view is open
+        const workspace = this.app.workspace;
+        const leaves = workspace.getLeavesOfType(VIEW_TYPE_SCRATCHPAD);
+        
+        if (leaves.length > 0) {
+            // View is open - update live UI
+            const scratchpadView = leaves[0].view as ScratchpadView;
+            if (scratchpadView) {
+                const currentText = scratchpadView.getTextValue();
+                const newText = currentText ? `${currentText}\n\n${textToAppend}` : textToAppend;
+                scratchpadView.setTextValue(newText);
+                await scratchpadView.saveContentToPlugin();
+            }
+        } else {
+            // View is closed - modify the saved history file in background
+            const currentData = await this.loadScratchpadContent() || { text: "", canvas: "" };
+            const newText = currentData.text ? `${currentData.text}\n\n${textToAppend}` : textToAppend;
+            await this.saveScratchpadContent(newText, currentData.canvas);
+        }
+        
+        new Notice("Copied to Scratchpad");
     }
 
     async saveScratchpadContent(text: string, canvasData: string) {
