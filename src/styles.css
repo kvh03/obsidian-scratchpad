@@ -7,31 +7,56 @@
 	display: flex;
 	flex-direction: column;
 	height: 100%;
-	gap: 10px;
 	padding: 10px;
 	box-sizing: border-box;
 }
 
-.scratchpad-textarea {
-	flex: 1 1 50%;
-	resize: none;
+.scratchpad-tabs {
+	display: flex;
+	justify-content: space-around;
+	gap: 10px;
+	margin-bottom: 10px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	padding-bottom: 5px;
+}
+
+.scratchpad-tab {
+	padding: 5px 10px;
+	border-radius: 4px;
+	font-size: var(--font-ui-medium);
+}
+
+.scratchpad-tab.active {
+	background-color: var(--background-modifier-active-hover);
+	color: var(--text-accent);
+}
+
+.scratchpad-view-area {
+	display: none;
+	flex-direction: column;
+	flex: 1;
 	min-height: 0;
+}
+
+.scratchpad-view-area.active {
+	display: flex;
+}
+
+.scratchpad-textarea {
+	flex: 1;
+	resize: none;
 	width: 100%;
-	font-size: 1em;
+	font-size: var(--font-small);
 	padding: 8px;
 	box-sizing: border-box;
-	border-radius: 6px;
-	overflow: auto;
-	line-height: var(--line-height-normal);
 }
 
 .scratchpad-canvas {
-	flex: 1 1 50%;
+	flex: 1;
 	width: 100%;
 	min-height: 0;
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 6px;
-	overflow: hidden;
 	background-color: #1b1b1b;
 	background-image: linear-gradient(to right, #d9d9d912 1px, transparent 1px),
 		linear-gradient(to bottom, #bababa12 1px, transparent 1px);
@@ -39,16 +64,18 @@
 	cursor: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1wZW4taWNvbiBsdWNpZGUtcGVuIj48cGF0aCBkPSJNMjEuMTc0IDYuODEyYTEgMSAwIDAgMC0zLjk4Ni0zLjk4N0wzLjg0MiAxNi4xNzRhMiAyIDAgMCAwLS41LjgzbC0xLjMyMSA0LjM1MmEuNS41IDAgMCAwIC42MjMuNjIybDQuMzUzLTEuMzJhMiAyIDAgMCAwIC44My0uNDk3eiIvPjwvc3ZnPg==') 0 21, auto;
 }
 
-.scratchpad-toolbar,
-.scratchpad-buttons-container {
+.scratchpad-controls {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	gap: 4px;
-	flex-shrink: 0;
-	container-type: inline-size;
+	gap: 8px;
+	padding-top: 10px;
 }
 
-.scratchpad-toolbar input[type="range"] {
-	width: 100px;
+.scratchpad-controls>* {
+	margin-left: auto;
+}
+
+input[type="range"] {
+	max-width: 80px;
 }

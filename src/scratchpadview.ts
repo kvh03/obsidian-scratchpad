@@ -1,4 +1,4 @@
-import { ItemView, Notice, WorkspaceLeaf, setIcon, Platform, Scope, debounce } from "obsidian";
+import { ItemView, Notice, WorkspaceLeaf, setIcon, Scope, debounce } from "obsidian";
 import ScratchpadPlugin from "./main";
 
 export const VIEW_TYPE_SCRATCHPAD = "scratchpad-view";
@@ -7,6 +7,10 @@ export class ScratchpadView extends ItemView {
     private textarea!: HTMLTextAreaElement;
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D | null = null;
+    
+    private activeTab: 'text' | 'canvas' = 'text';
+    private textContainer!: HTMLDivElement;
+    private canvasContainer!: HTMLDivElement;
 
     private drawing = false;
     private lastX = 0;
@@ -49,10 +53,29 @@ export class ScratchpadView extends ItemView {
         this.contentEl.empty();
         this.contentEl.addClass("scratchpad-container");
 
-        this.setupTextarea();
-        this.setupActionButtons();
-        this.setupCanvas();
-        this.setupToolbar();
+        // Create Tabs
+        const tabContainer = this.contentEl.createDiv({ cls: "scratchpad-tabs" });
+        const textTab = tabContainer.createEl("div", { cls: "scratchpad-tab active", text: "Text" });
+        const canvasTab = tabContainer.createEl("div", { cls: "scratchpad-tab", text: "Canvas" });
+        const saveTab = tabContainer.createEl("div", { cls: "scratchpad-tab", text: "Save" });
+
+        // Create Containers
+        this.textContainer = this.contentEl.createDiv({ cls: "scratchpad-view-area active" });
+        this.canvasContainer = this.contentEl.createDiv({ cls: "scratchpad-view-area" });
+
+        // Initialize content
+        this.setupTextarea(this.textContainer);
+        this.setupTextControls(this.textContainer);
+        this.setupCanvas(this.canvasContainer);
+        this.setupCanvasControls(this.canvasContainer);
+
+        // Tab Logic
+        textTab.onclick = () => this.switchTab('text', textTab, canvasTab);
+        canvasTab.onclick = () => this.switchTab('canvas', textTab, canvasTab);
+        saveTab.onclick = () => {
+            void this.saveContentToPlugin().then(() => new Notice('Saved!'));
+        };
+        
         this.scope = new Scope(this.app.scope);
 
         await this.loadContentFromPlugin();
@@ -72,6 +95,15 @@ export class ScratchpadView extends ItemView {
         this.scope.register(["Mod"], "y", (evt) => this.handleRedo(evt));
     }
 
+    private switchTab(tab: 'text' | 'canvas', textTab: HTMLElement, canvasTab: HTMLElement) {
+        this.activeTab = tab;
+        textTab.toggleClass('active', tab === 'text');
+        canvasTab.toggleClass('active', tab === 'canvas');
+        this.textContainer.toggleClass('active', tab === 'text');
+        this.canvasContainer.toggleClass('active', tab === 'canvas');
+        if (tab === 'canvas') this.resizeCanvas();
+    }
+
     onResize(): void {
         super.onResize();
         this.resizeCanvas();
@@ -87,8 +119,8 @@ export class ScratchpadView extends ItemView {
         return isNaN(size) ? 2 : size;
     }
 
-    private setupTextarea() {
-        this.textarea = this.contentEl.createEl("textarea", {
+    private setupTextarea(container: HTMLElement) {
+        this.textarea = container.createEl("textarea", {
             cls: "scratchpad-textarea",
             attr: { placeholder: "Quick notes here..." },
         });
@@ -106,81 +138,43 @@ export class ScratchpadView extends ItemView {
         this.textarea.addEventListener("input", this.debouncedSaveTextSnapshot);
     }
 
-    private setupActionButtons() {
-        const buttonContainer = this.contentEl.createDiv({
-            cls: "scratchpad-buttons-container",
-        });
-
-        const saveButton = buttonContainer.createEl("button", {
-            cls: "scratchpad-save-button",
-        });
-        setIcon(saveButton, 'save');
-        saveButton.addEventListener("click", () => {
-            void this.saveContentToPlugin().then(() => {
-                new Notice('Scratchpad saved');
-            });
-        });
-
-        const clearNoteBtn = buttonContainer.createEl("button", {
-            cls: "scratchpad-clear-notes",
-        });
+    private setupTextControls(container: HTMLElement) {
+        const controls = container.createDiv({ cls: "scratchpad-controls" });
+        const clearNoteBtn = controls.createEl("button", { text: "Clear Note" });
         setIcon(clearNoteBtn, 'eraser');
         clearNoteBtn.addEventListener("click", async () => {
             this.textarea.value = "";
             this.textHistory = [""];
             this.textIndex = 0;
-            let currentCanvasData = "";
-            if (this.canvas && this.ctx) {
-                currentCanvasData = this.canvas.toDataURL("image/png");
-            }
-            void this.plugin.saveScratchpadContent("", currentCanvasData);
+            void this.plugin.saveScratchpadContent("", "");
         });
-
-        this.contentEl.appendChild(buttonContainer);
     }
 
-    private setupCanvas() {
+    private setupCanvas(container: HTMLElement) {
         this.canvas.classList.add("scratchpad-canvas");
         this.canvas.tabIndex = 0;
         this.ctx = this.canvas.getContext("2d", { willReadFrequently: true });
-        this.contentEl.appendChild(this.canvas);
+        container.appendChild(this.canvas);
     }
 
-    private setupToolbar() {
-        const toolbar = this.contentEl.createDiv({
-            cls: "scratchpad-toolbar",
-        });
+    private setupCanvasControls(container: HTMLElement) {
+        const controls = container.createDiv({ cls: "scratchpad-controls" });
 
-        const colorInput = toolbar.createEl("input", {
-            type: "color",
-            value: this.brushColor,
-        });
+        const colorInput = controls.createEl("input", { type: "color", value: this.brushColor });
         colorInput.addEventListener("input", (e) => {
             this.brushColor = (e.target as HTMLInputElement).value;
         });
 
-        const sizeSlider = toolbar.createEl("input", {
+        const sizeSlider = controls.createEl("input", {
             type: "range",
             value: this.brushSize.toString(),
-            attr: {
-                min: "1",
-                max: "20"
-            },
+            attr: { min: "1", max: "20" }
         });
-
         sizeSlider.addEventListener("input", (e) => {
             this.brushSize = parseInt((e.target as HTMLInputElement).value, 10);
         });
 
-        const undoBtn = toolbar.createEl("button");
-        setIcon(undoBtn, 'undo');
-        undoBtn.addEventListener("click", () => this.undoCanvas());
-
-        const redoBtn = toolbar.createEl("button");
-        setIcon(redoBtn, 'redo');
-        redoBtn.addEventListener("click", () => this.redoCanvas());
-
-        const clearCanvasBtn = toolbar.createEl("button");
+        const clearCanvasBtn = controls.createEl("button");
         setIcon(clearCanvasBtn, 'eraser');
         clearCanvasBtn.addEventListener("click", async () => {
             if (!this.ctx) return;
@@ -190,14 +184,8 @@ export class ScratchpadView extends ItemView {
             this.saveCanvasSnapshot();
             void this.plugin.saveScratchpadContent(this.textarea.value, "");
         });
-
-        toolbar.empty();
-        if (Platform.isAndroidApp || Platform.isIosApp)
-            toolbar.append(colorInput, sizeSlider, undoBtn, redoBtn, clearCanvasBtn);
-        else
-            toolbar.append(colorInput, sizeSlider, clearCanvasBtn);
-
-        this.contentEl.appendChild(toolbar);
+        
+        controls.append(colorInput, sizeSlider, clearCanvasBtn);
     }
 
     private registerDrawingEvents() {

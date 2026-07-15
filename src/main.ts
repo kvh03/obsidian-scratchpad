@@ -13,7 +13,7 @@ export default class ScratchpadPlugin extends Plugin {
 
         this.addCommand({
             id: "open-scratchpad-view",
-            name: "Open",
+            name: "Open sidebar",
             callback: () => this.activateView(),
         });
 
