@@ -7,7 +7,7 @@
 
 </div>
 
-**Scratchpad** is an Obsidian plugin that provides a simple space in the sidebar for quick text notes and freehand drawings — perfect for jotting down ideas while working across multiple notes.
+**Scratchpad** is an Obsidian plugin that provides a simple space in the sidebar for quick text notes and freehand drawings - perfect for jotting down ideas while working across multiple notes.
 
 ## Features
 
@@ -27,19 +27,16 @@
 ## Usage
 
 1. Open the command palette (`Ctrl/Cmd + P`) and search for `Scratchpad`, or click the notebook-pen icon in the left ribbon.
-2. The plugin opens in the right sidebar.
-3. The top section is a text area where you can type quick notes (Markdown is not rendered).
-4. The bottom section is a canvas where you can draw using your mouse or stylus.
-5. Use the toolbar to:
-   - Pick brush color
-   - Adjust brush size
-   - Clear the canvas
-   - Save the content
+2. The plugin opens in the sidebar with two tabs: **Text** and **Canvas**.
+3. In the **Text** tab, you can type quick notes. Use the **Copy to Scratchpad** option from the context menu in any Markdown note to append selected text here.
+4. In the **Canvas** tab, you can draw using your mouse or stylus, with tools to adjust color, brush size, and clear the canvas.
+5. Click the **Save** button at the top to save your current text and drawing content to disk.
 
-![](assets/scratchpad.png)
+![](assets/scratchpad-text.png)
+![](assets/scratchpad-canvas.png)
 
 > [!NOTE]
-> - This is a temporary note — your content is stored in memory and will be lost when the app is closed unless you manually save it to disk.
+> - This is a temporary note - your content is stored in memory and will be lost when the app is closed unless you manually save it to disk.
 > - Scratchpad **does not support multiple notes**.
 
 Read the blog at https://bit.ly/4exb8PZ.
