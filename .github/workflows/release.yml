@@ -46,7 +46,14 @@ jobs:
               "buildFinishedOn": "${finished_on}",
               "runId": "${GITHUB_RUN_ID}",
               "runNumber": "${GITHUB_RUN_NUMBER}"
-            }
+            },
+            "materials": [],
+            "completeness": {
+              "parameters": true,
+              "environment": false,
+              "materials": false
+            },
+            "reproducible": false
           }
           EOF
 
