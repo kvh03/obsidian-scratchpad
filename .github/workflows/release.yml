@@ -18,7 +18,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20.x"
+          node-version: "22"
 
       - name: Build plugin
         run: |
@@ -31,6 +31,7 @@ jobs:
           subject-path: |
             main.js
             styles.css
+          predicate-type: 'https://slsa.dev/provenance/v1'
 
       - name: Create release
         env:
