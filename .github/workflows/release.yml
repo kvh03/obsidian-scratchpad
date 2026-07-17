@@ -10,8 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      id-token: write
-      attestations: write
     steps:
       - uses: actions/checkout@v4
 
@@ -20,52 +18,10 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Record build start
-        run: echo "started_on=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_ENV
-
       - name: Build plugin
         run: |
           npm install
           npm run build
-
-      - name: Create provenance predicate file
-        run: |
-          finished_on="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          cat <<EOF > provenance.json
-          {
-            "builder": { "id": "https://github.com/${GITHUB_REPOSITORY}" },
-            "buildType": "https://slsa.dev/provenance/v1",
-            "invocation": {
-              "configSource": {
-                "uri": "https://github.com/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}",
-                "entryPoint": "npm run build"
-              }
-            },
-            "metadata": {
-              "buildStartedOn": "${started_on}",
-              "buildFinishedOn": "${finished_on}",
-              "runId": "${GITHUB_RUN_ID}",
-              "runNumber": "${GITHUB_RUN_NUMBER}"
-            },
-            "materials": [],
-            "completeness": {
-              "parameters": true,
-              "environment": false,
-              "materials": false
-            },
-            "reproducible": false
-          }
-          EOF
-
-      - name: Generate artifact attestation
-        uses: actions/attest@v1
-        with:
-          subject-path: |
-            main.js
-            styles.css
-            manifest.json
-          predicate-path: provenance.json
-          predicate-type: 'https://slsa.dev/provenance/v1'
 
       - name: Create release
         env:
